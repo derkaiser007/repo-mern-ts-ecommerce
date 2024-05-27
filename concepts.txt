@@ -1,0 +1,42 @@
+###Frontend###
+1)
+npm create vite@latest
+npm i
+npm run dev
+
+2)
+npm i react-hot-toast react-icons firebase react-router-dom react-table
+npm i --save-dev @types/react-table
+
+3)
+npm i --save chart.js react-chartjs-2
+
+4)
+npm i @reduxjs/toolkit react-redux axios
+
+###Backend###
+1)
+npm init
+npm i -g typescript
+tsc --init
+npm i express dotenv mongoose validator multer uuid node-cache morgan stripe cors
+npm i --save-dev @types/express @types/node typescript nodemon @types/validator @types/multer @types/uuid @types/morgan @types/cors
+npm i --save-dev @faker-js/faker(To generate Fake Products For Testing.)
+
+2)
+Few changes in "tsconfig.json":
+"target": "ES2020",
+"outDir": "dist", 
+"module": "NodeNext", 
+"rootDir": "src",
+"moduleResolution": "NodeNext", 
+
+3)
+Few changes in "package.json":
+"type": "module",
+"scripts": {
+  "start": "node ./dist/app.js",
+  "build": "tsc",
+  "watch": "tsc -w",
+  "dev": "nodemon ./dist/app.js"
+},
