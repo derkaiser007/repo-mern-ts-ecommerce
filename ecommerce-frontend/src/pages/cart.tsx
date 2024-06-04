@@ -1,67 +1,86 @@
 import { useEffect, useState } from "react"
 import { VscError } from "react-icons/vsc";
-import CartItem from "../components/cart-item";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { RootState, server } from "../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addToCart,
+  calculatePrice,
+  discountApplied,
+  removeCartItem,
+} from "../redux/reducer/cartReducer";
+import { CartItem } from "../types/types";
+import CartItemCard from "../components/cart-item";
 
-const subtotal = 50000
-const shippingCharges = 150
-const tax = subtotal * 0.18
-const discount = 500
-
-const cartItems = [
-    {
-        productId: "erd564erdf6785tfg",
-        photo: "https://www.apple.com/newsroom/images/product/mac/standard/Apple-MacBook-Pro-M2-Pro-and-M2-Max-hero-230117.jpg.landing-big_2x.jpg",
-        name: "MacBook",
-        price: 125000,
-        quantity: 1
-    },
-    {
-        productId: "rtyf675tfgr787uhy",
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5y4pO8WC0UeUdqfcf5SL-sN7mxZhuQNu9yy60q_ReXQ&s",
-        name: "IPhone",
-        price: 95000,
-        quantity: 1
-    },
-    {
-        productId: "dret567yt54erfnj879jn",
-        photo: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/imac-24-no-id-blue-selection-hero-202310?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1701459101618",
-        name: "IMac",
-        price: 110000,
-        quantity: 1
-    }
-]
 
 const Cart = () => {
+    const { cartItems, subtotal, tax, total, shippingCharges, discount } = useSelector((state: RootState) => state.cartReducer);
+    
+    const dispatch = useDispatch();
     const [couponCode, setCouponCode] = useState<string>('')
     const [isValidCouponCode, setIsValidCouponCode] = useState<boolean>(false)
 
-    useEffect(() => {
-        const timeOutId = setTimeout(() => {
-            if(Math.random() > 0.5) setIsValidCouponCode(true)
-            else setIsValidCouponCode(false)
-        }, 1000)
+    const incrementHandler = (cartItem: CartItem) => {
+      if (cartItem.quantity >= cartItem.stock) return;
+  
+      dispatch(addToCart({ ...cartItem, quantity: cartItem.quantity + 1 }));
+    };
 
-        return () => {
-            clearTimeout(timeOutId);
-        }
-    }, [couponCode])
+    const decrementHandler = (cartItem: CartItem) => {
+      if (cartItem.quantity <= 1) return;
+  
+      dispatch(addToCart({ ...cartItem, quantity: cartItem.quantity - 1 }));
+    };
+
+    const removeHandler = (productId: string) => {
+      dispatch(removeCartItem(productId));
+    };
+
+    useEffect(() => {
+      const { token: cancelToken, cancel } = axios.CancelToken.source();
+  
+      const timeOutID = setTimeout(() => {
+        axios
+          .get(`${server}/api/v1/payment/discount?coupon=${couponCode}`, {
+            cancelToken,
+          })
+          .then((res) => {
+            dispatch(discountApplied(res.data.discount));
+            setIsValidCouponCode(true);
+            dispatch(calculatePrice());
+          })
+          .catch(() => {
+            dispatch(discountApplied(0));
+            setIsValidCouponCode(false);
+            dispatch(calculatePrice());
+          });
+      }, 1000);
+  
+      return () => {
+        clearTimeout(timeOutID);
+        cancel();
+        setIsValidCouponCode(false);
+      };
+    }, [couponCode]);
 
     return(
         <div className="cart">
-            <main>
-                {cartItems.length > 0 ? (
-                    cartItems.map((i, idx) => (
-                      <CartItem
-                        key={idx}
-                        cartItem={i}
-                      />
-                    ))
-                  ) : (
-                    <h1>No Items Added</h1>
-                  )
-                }
-            </main>
+          <main>
+            {cartItems.length > 0 ? (
+              cartItems.map((i, idx) => (
+                <CartItemCard
+                  incrementHandler={incrementHandler}
+                  decrementHandler={decrementHandler}
+                  removeHandler={removeHandler}
+                  key={idx}
+                  cartItem={i}
+                />
+              ))
+            ) : (
+              <h1>No Items Added</h1>
+            )}
+          </main>
             
             <aside>
                 <p>Subtotal: ₹{subtotal}</p>
@@ -71,16 +90,11 @@ const Cart = () => {
                     {couponCode &&
                         (isValidCouponCode ? (
                             <p>Discount: <em className="red"> - ₹{discount}</em></p>
-                        ) : '')
+                        ) : <p>Discount: <em className="red"> - ₹0</em></p>)
                     }
                 </p>
                 <p>
-                    {couponCode &&
-                        (isValidCouponCode ? (
-                            <b>Total: ₹{subtotal + shippingCharges + tax - discount}</b>
-                        ) : <b>Total: ₹{subtotal + shippingCharges + tax}</b>
-                        )
-                    }
+                <b>Total: ₹{total}</b>
                 </p>
 
                 <input
@@ -99,7 +113,8 @@ const Cart = () => {
                     <span className="red">
                       Invalid Coupon <VscError />
                     </span>
-                  ))}
+                  ))
+                }
 
                 {cartItems.length > 0 && <Link to="/shipping">Checkout</Link>}
             </aside>

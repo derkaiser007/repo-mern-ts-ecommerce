@@ -1,26 +1,34 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
+import axios from "axios";
+import { server } from "../../../redux/store";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
 
 const allLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const allNumbers = "1234567890";
 const allSymbols = "!@#$%^&*()_+";
 
 const Coupon = () => {
-  const [size, setSize] = useState<number>(8);
+  const { user } = useSelector((state: RootState) => state.userReducer);
+  const [size, setSize] = useState<number>(12);
   const [prefix, setPrefix] = useState<string>("");
   const [includeNumbers, setIncludeNumbers] = useState<boolean>(false);
   const [includeCharacters, setIncludeCharacters] = useState<boolean>(false);
   const [includeSymbols, setIncludeSymbols] = useState<boolean>(false);
-  const [isCopied, setIsCopied] = useState<boolean>(false);
+  // const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [amount, setAmount] = useState<number>(100);
+  const [couponText, setCouponText] = useState<string>("");
 
-  const [coupon, setCoupon] = useState<string>("");
-
+  /*
   const copyText = async (coupon: string) => {
     await window.navigator.clipboard.writeText(coupon);
     setIsCopied(true);
   };
+  */
 
-  const submitHandler = (e: FormEvent<HTMLFormElement>) => {
+  const submitHandlerForCouponText = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!includeNumbers && !includeCharacters && !includeSymbols)
@@ -39,12 +47,47 @@ const Coupon = () => {
       result += entireString[randomNum];
     }
 
-    setCoupon(result);
+    setCouponText(result);
   };
 
+  /*
   useEffect(() => {
     setIsCopied(false);
   }, [coupon]);
+  */
+
+    
+  const submitHandlerToGenerateCoupon = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!user || !user._id) {
+      return toast.error("User is not logged in");
+    }
+
+    try {
+      await axios.post(
+        `${server}/api/v1/payment/coupon/new?id=${user._id}`,
+        {
+          coupon: couponText,
+          amount: amount,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      toast.success("Coupon generated successfully");
+
+    } catch (error: any) {
+      console.error("Error generating coupon:", error.response?.data || error.message);
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+  }
+};
 
   return (
     <div className="admin-container">
@@ -52,7 +95,7 @@ const Coupon = () => {
       <main className="dashboard-app-container">
         <h1>Coupon</h1>
         <section>
-          <form className="coupon-form" onSubmit={submitHandler}>
+          <form className="coupon-form" onSubmit={submitHandlerForCouponText}>
             <input
               type="text"
               placeholder="Text to include"
@@ -93,18 +136,38 @@ const Coupon = () => {
                 onChange={() => setIncludeSymbols((prev) => !prev)}
               />
               <span>Symbols</span>
+
             </fieldset>
-            <button type="submit">Generate</button>
+            <button type="submit">Generate Text For Coupon</button>
           </form>
 
+          
+          <form className="coupon-form" onSubmit={submitHandlerToGenerateCoupon}>
+          {/*
           {coupon && (
             <code>
-              {coupon}{" "}
-              <span onClick={() => copyText(coupon)}>
+              {coupon}
+               
+              <span onClick={() => copyText(coupon)}> 
                 {isCopied ? "Copied" : "Copy"}
-              </span>{" "}
+              </span>
             </code>
           )}
+          */}
+
+          {couponText && (
+            <p>Coupon: {couponText}</p>
+          )}      
+
+          <p>Amount:  
+            <input 
+              type="number"
+              value={amount}
+              onChange={e => setAmount(Number(e.target.value))}
+            />
+          </p>
+          <button type="submit">Generate Coupon</button>
+        </form>
         </section>
       </main>
     </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ProductCard from "../components/product-card";
+import { useCategoriesQuery, useSearchProductsQuery } from "../redux/api/productAPI";
 
 const Search = () => {
     const [search, setSearch] = useState("");
@@ -8,31 +9,29 @@ const Search = () => {
     const [category, setCategory] = useState("");
     const [page, setPage] = useState(1);
 
+    const {
+      data: categoriesResponse,
+      isLoading: loadingCategories,
+      isError,
+      error,
+    } = useCategoriesQuery("");
+
+    const {
+      isLoading: productLoading,
+      data: searchedData,
+      isError: productIsError,
+      error: productError,
+    } = useSearchProductsQuery({
+      search,
+      sort,
+      category,
+      page,
+      price: maxPrice,
+    });
+
     const addToCartHandler = () => {}
 
-    const products = [
-        {
-            _id: "erd564erdf6785tfg",
-            photo: "https://www.apple.com/newsroom/images/product/mac/standard/Apple-MacBook-Pro-M2-Pro-and-M2-Max-hero-230117.jpg.landing-big_2x.jpg",
-            name: "MacBook",
-            price: 125000,
-            stock: 45
-        },
-        {
-            _id: "rtyf675tfgr787uhy",
-            photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5y4pO8WC0UeUdqfcf5SL-sN7mxZhuQNu9yy60q_ReXQ&s",
-            name: "IPhone",
-            price: 95000,
-            stock: 60
-        },
-        {
-            _id: "dret567yt54erfnj879jn",
-            photo: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/imac-24-no-id-blue-selection-hero-202310?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1701459101618",
-            name: "IMac",
-            price: 110000,
-            stock: 10
-        }
-    ]
+    
 
     const isPrevPage = page > 1;
     const isNextPage = page < 4;
@@ -55,7 +54,7 @@ const Search = () => {
               <input
                 type="range"
                 min={100}
-                max={100000}
+                max={150000}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
               />
@@ -68,9 +67,13 @@ const Search = () => {
                 onChange={(e) => setCategory(e.target.value)}
               >
                 <option value="">ALL</option>
-                <option value="s1">Sample1</option>
-                <option value="s2">Sample2</option>
-                <option value="s3">Sample3</option>                
+                {!loadingCategories &&
+                  categoriesResponse?.categories.map((i) => (
+                    <option key={i} value={i}>
+                      {i.toUpperCase()}
+                    </option>
+                  ))
+                }              
               </select>
             </div>
           </aside>
@@ -85,38 +88,43 @@ const Search = () => {
     
             
               <div className="search-product-list">
-                {products.map((i) => (
-                  <ProductCard
-                    key={i._id}
-                    productId={i._id}
-                    name={i.name}
-                    price={i.price}
-                    stock={i.stock}
-                    handler={addToCartHandler}
-                    photo={i.photo}
-                  />
-                ))}
-              </div>
-           
+                {productLoading ? (
+                  "Loading..."
+                ) : (
+                  searchedData?.products.map((i) => (
+                    <ProductCard
+                      key={i._id}
+                      productId={i._id}
+                      name={i.name}
+                      price={i.price}
+                      stock={i.stock}
+                      handler={addToCartHandler}
+                      photo={i.photo}
+                    />
+                  ))
+                )}
+              </div>           
     
             
-              <article>
-                <button
-                  disabled={!isPrevPage}
-                  onClick={() => setPage((prev) => prev - 1)}
-                >
-                  Prev
-                </button>
-                <span>
-                  {page} of {4}
-                </span>
-                <button  
-                  disabled={!isNextPage}
-                  onClick={() => setPage((prev) => prev + 1)}
-                >
-                  Next
-                </button>
-              </article>
+              {searchedData && searchedData.totalPage > 1 && (
+                <article>
+                  <button
+                    disabled={!isPrevPage}
+                    onClick={() => setPage((prev) => prev - 1)}
+                  >
+                    Prev
+                  </button>
+                  <span>
+                    {page} of {searchedData.totalPage}
+                  </span>
+                  <button
+                    disabled={!isNextPage}
+                    onClick={() => setPage((prev) => prev + 1)}
+                  >
+                    Next
+                  </button>
+                </article>
+              )}
             
           </main>
         </div>

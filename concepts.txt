@@ -5,7 +5,7 @@ npm i
 npm run dev
 
 2)
-npm i react-hot-toast react-icons firebase react-router-dom react-table
+npm i react-hot-toast react-icons firebase react-router-dom react-table moment @stripe/react-stripe-js @stripe/stripe-js
 npm i --save-dev @types/react-table
 
 3)
