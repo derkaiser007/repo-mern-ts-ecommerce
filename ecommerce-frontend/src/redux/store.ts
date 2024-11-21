@@ -23,3 +23,9 @@ export const store = configureStore({
 })
 
 export type RootState = ReturnType<typeof store.getState>;
+
+// RTK Query's middleware is essential for enabling features such as:
+// 1) Automated Cache Management: RTK Query keeps a cache of fetched data to avoid unnecessary network requests. It 
+// ensures data is shared across components without duplicating API calls.
+// 2) Background Refetching: Automatically refetches data when certain triggers occur (e.g., when a component using 
+// cached data re-mounts).

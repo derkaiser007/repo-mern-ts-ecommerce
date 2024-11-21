@@ -26,10 +26,12 @@ export const cartReducer = createSlice({
     addToCart: (state, action: PayloadAction<CartItem>) => {
       state.loading = true;
 
+      // Find the index of the item with the same productId in the cart
       const index = state.cartItems.findIndex(
         (i) => i.productId === action.payload.productId
       );
 
+      // If the item already exists, update it; otherwise, add it to the cart
       if (index !== -1) state.cartItems[index] = action.payload;
       else state.cartItems.push(action.payload);
       state.loading = false;

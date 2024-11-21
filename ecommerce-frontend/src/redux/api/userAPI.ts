@@ -3,6 +3,7 @@ import { MessageResponse,  UserResponse } from "../../types/api-types";
 import { User } from "../../types/types";
 import axios from "axios";
 
+// Mutations: Mutations are for creating, updating, or deleting data.
 export const userAPI = createApi({
     reducerPath: "userApi",
     baseQuery: fetchBaseQuery({
@@ -11,14 +12,15 @@ export const userAPI = createApi({
     endpoints: (builder) => ({
       login: builder.mutation<MessageResponse, User>({
         query: (user) => ({
-          url: "new",
-          method: "Post",
-          body: user,
+          url: "new", // Appends "new" to the base URL
+          method: "Post",  // HTTP method is POST
+          body: user, // Sends the `user` object in the request body
         }),
       })
     })
 })
 
+// Queries: Queries are for retrieving data from the server, not altering it.
 export const getUser = async (id: string) => {
   try {
     const { data }: { data: UserResponse } = await axios.get(
@@ -32,3 +34,10 @@ export const getUser = async (id: string) => {
 };
 
 export const { useLoginMutation } = userAPI;
+
+// The difference between createApi and createSlice lies in their purpose and functionality within Redux Toolkit:
+// 1. createApi: createApi is part of RTK Query, designed for handling API requests and managing server-side data 
+// efficiently. Simplifies API calls (fetching, creating, updating, or deleting data).
+// 2. createSlice: createSlice is a Redux utility for creating reducers and associated actions in a concise and 
+// readable way. Simplifies state management by creating reducers and actions in one step. Designed for managing 
+// local state in Redux.

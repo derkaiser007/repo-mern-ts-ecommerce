@@ -35,6 +35,9 @@ export type Product = {
 };
 
 export type OrderItem = Omit<CartItem, "stock"> & { _id: string };
+// Omit is a TypeScript utility type that removes the specified key(s) ("stock" in this case) from the given type 
+// (CartItem). The & operator merges the properties of two types into one. This adds a new property _id of type 
+// string to the resulting type.
 
 export type Order = {
   orderItems: OrderItem[];

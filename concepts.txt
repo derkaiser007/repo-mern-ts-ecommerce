@@ -5,13 +5,17 @@ npm i
 npm run dev
 
 2)
-npm i react-hot-toast react-icons firebase react-router-dom react-table moment @stripe/react-stripe-js @stripe/stripe-js
+npm i react-hot-toast react-icons react-router-dom react-table moment @stripe/react-stripe-js @stripe/stripe-js
 npm i --save-dev @types/react-table
 
 3)
-npm i --save chart.js react-chartjs-2
+npm i @auth0/auth0-react
+npm i firebase
 
 4)
+npm i --save chart.js react-chartjs-2
+
+5)
 npm i @reduxjs/toolkit react-redux axios
 
 ###Backend###

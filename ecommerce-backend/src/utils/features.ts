@@ -48,7 +48,14 @@ export const invalidateCache = async ({
   }
 
   if (admin) {
-    
+    const adminKeys: string[] = [
+      "admin-stats",
+      "admin-pie-charts",
+      "admin-bar-charts",
+      "admin-line-charts",
+    ];
+
+    myCache.del(adminKeys);
   }
 };
 

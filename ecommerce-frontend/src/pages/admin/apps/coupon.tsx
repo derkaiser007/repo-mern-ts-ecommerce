@@ -146,8 +146,7 @@ const Coupon = () => {
           {/*
           {coupon && (
             <code>
-              {coupon}
-               
+              {coupon}               
               <span onClick={() => copyText(coupon)}> 
                 {isCopied ? "Copied" : "Copy"}
               </span>

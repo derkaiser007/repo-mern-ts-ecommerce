@@ -3,6 +3,9 @@ import { Product } from "../models/product.js";
 import { NewProductRequestBody, SearchRequestQuery, BaseQuery } from "../types/types.js";
 import { Request } from "express";
 import ErrorHandler from "../utils/utility-class.js";
+// The fs module in Node.js stands for "file system". It provides an API to interact with the file system, 
+// enabling your application to read, write, delete, and manage files and directories on your system.
+// The fs module includes both: Synchronous APIs (blocking) and Asynchronous APIs (non-blocking)
 import { rm } from "fs";
 import { myCache } from "../app.js";
 import { invalidateCache } from "../utils/features.js";
@@ -195,8 +198,15 @@ export const getAllProducts = TryCatch(
   
       const [products, filteredOnlyProduct] = await Promise.all([
         productsPromise,
-        Product.find(baseQuery),
+        Product.find(baseQuery)
       ]);
+      // Using Promise.all in the way shown has significant benefits, particularly in terms of efficiency 
+      // and maintainability. Both productsPromise and Product.find(baseQuery) queries run simultaneously.
+      // Promise.all waits for both promises to resolve before continuing. Queries that are independent can 
+      // execute in parallel, reducing total execution time compared to running them sequentially (one after 
+      // the other).
+      // If each query takes T1 and T2 seconds, running them sequentially would take 𝑇1+𝑇2 seconds.
+      // Using Promise.all, the total time is approximately the longer of the two durations max(T1,T2) seconds.
   
       const totalPage = Math.ceil(filteredOnlyProduct.length / limit);
   
@@ -235,7 +245,7 @@ generateRandomProducts(30)
 */
 
 /*
-const deleteRandomsProducts = async (count: number = 10) => {
+const deleteRandomProducts = async (count: number = 10) => {
   const products = await Product.find({}).skip(2);
 
   for (let i = 0; i < products.length; i++) {
@@ -246,7 +256,7 @@ const deleteRandomsProducts = async (count: number = 10) => {
   console.log({ succecss: true });
 };
 
-deleteRandomsProducts()
+deleteRandomProducts()
 */
 
 
