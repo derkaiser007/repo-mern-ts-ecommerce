@@ -1,15 +1,29 @@
-import { lazy, Suspense, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+// ###React.lazy(): It is used to dynamically load components, enabling code-splitting. This means the component's code 
+// is only loaded when it is needed, reducing the initial bundle size and improving performance.
+// ###React.suspanse(): When you use React.lazy() to split code, the component isn't immediately available. 
+// React.Suspense waits for the component to finish loading before rendering it. During this time, the fallback 
+// UI is displayed.
+import { lazy, Suspense, useEffect } from 'react';
 import Header from "./components/header";
-import Loader from './components/loader'
-import { Toaster } from "react-hot-toast";
-import { useDispatch, useSelector } from 'react-redux';
-import { onAuthStateChanged } from 'firebase/auth';
-import { userExist, userNotExist } from './redux/reducer/userReducer';
-import { auth } from './firebase'
-import { getUser } from './redux/api/userAPI';
-import { RootState } from './redux/store';
+import Loader from './components/loader';
 import ProtectedRoute from './components/protected-route';
+// "BrowserRouter as Router" just for convenience.
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from "react-hot-toast";
+// ###useSelector: useSelector allows you to read data from the Redux store. It takes a selector function as an 
+// argument, which is used to extract a specific part of the state.
+// 1: Access State: Allows access to the specific part of the Redux store you need.
+// 2: Re-render Optimization: Only re-renders the component when the selected state changes.
+// 3: Declarative: Encourages extracting data rather than coupling components to the entire store.
+// ###useDispatch: useDispatch gives access to the dispatch function, which is used to dispatch actions to the Redux 
+// store. Actions are used to trigger state changes in reducers.
+// 1: Trigger State Updates: Allows components to send updates to the Redux store.
+// 2: Flexible: Can dispatch actions synchronously or asynchronously (e.g., via Redux Thunks).
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from './redux/store';
+import { userExist, userNotExist } from './redux/reducer/userReducer';
+import { getUser } from './redux/api/userAPI';
+import { useAuth0 }  from '@auth0/auth0-react';
 
 const Home = lazy(() => import('./pages/home'))
 const Search = lazy(() => import('./pages/search'))
@@ -48,16 +62,28 @@ function App() {
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const data = await getUser(user.uid);
-        dispatch(userExist(data.user));
-      } else dispatch(userNotExist());
-    });
-  }, []);
+  const { isAuthenticated, isLoading, getIdTokenClaims } = useAuth0();
 
-  return loading? (
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (isAuthenticated && user) {
+        try {
+          // Optionally, you can get a JWT from Auth0 to use in your API requests
+          const token = await getIdTokenClaims();
+          const userData = await getUser(user, token?.__raw); // Fetch additional user data with token
+          dispatch(userExist(userData));
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      } else if (!isLoading) {
+        dispatch(userNotExist());
+      }
+    };
+
+    fetchUser();
+  }, [isAuthenticated, user, isLoading, getIdTokenClaims, dispatch]);
+
+  return loading ? (
     <Loader />
   ) : (
     <Router>
@@ -76,7 +102,9 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route element={<ProtectedRoute isAuthenticated={user ? true : false} />}>
+          <Route element={
+            <ProtectedRoute isAuthenticated={user ? true : false} />
+          }>
             <Route path='/shipping' element={<Shipping />} />
             <Route path='/orders' element={<Orders />} />
             <Route path='/order' element={<OrderDetails />} />
@@ -90,16 +118,17 @@ function App() {
               isAuthenticated={true} 
               adminOnly={true} 
               isAdmin={user?.role === "admin" ? true : false} />
-            }
-          >
+          }>
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/product" element={<Products />} />
             <Route path="/admin/customer" element={<Customers />} />
             <Route path="/admin/transaction" element={<Transaction />} />
+
             {/* Charts */}
             <Route path="/admin/chart/bar" element={<Barcharts />} />
             <Route path="/admin/chart/pie" element={<Piecharts />} />
             <Route path="/admin/chart/line" element={<Linecharts />} />
+
             {/* Apps */}
             <Route path="/admin/app/coupon" element={<Coupon />} />
             <Route path="/admin/app/stopwatch" element={<Stopwatch />} />
@@ -107,9 +136,7 @@ function App() {
 
             {/* Management */}
             <Route path="/admin/product/new" element={<NewProduct />} />
-
             <Route path="/admin/product/:id" element={<ProductManagement />} />
-
             <Route path="/admin/transaction/:id" element={<TransactionManagement />} />
           </Route>
           <Route path="*" element={<NotFound />} />
