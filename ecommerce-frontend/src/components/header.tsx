@@ -22,10 +22,10 @@ const Header = ({ user }: PropsType) => {
   const logoutHandler = async () => {
     try {
       await logout({logoutParams:{ returnTo: window.location.origin }});
-      toast.success("Log Out Successfully");
+      toast.success("Logout Successfully");
       setIsOpen(false);
     } catch (error) {
-      toast.error("Sign Out Fail");
+      toast.error("Logout Fail");
     }
   }
 
@@ -46,14 +46,13 @@ const Header = ({ user }: PropsType) => {
           <button onClick={() => setIsOpen((prev) => !prev)}>
             <FaUser />
           </button>
-          <dialog open={isOpen}>
+          <dialog open={isOpen}> 
             <div>
               {user.role === "admin" && (
                 <Link onClick={() => setIsOpen(false)} to="/admin/dashboard">
                   Admin
                 </Link>
               )}
-
               <Link onClick={() => setIsOpen(false)} to="/orders">
                 Orders
               </Link>
@@ -73,3 +72,5 @@ const Header = ({ user }: PropsType) => {
 };
 
 export default Header;
+
+// the dialog box (dropdown menu)

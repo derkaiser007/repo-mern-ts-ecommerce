@@ -5,7 +5,7 @@ npm i
 npm run dev
 
 2)
-npm i react-hot-toast react-icons react-router-dom react-table moment @stripe/react-stripe-js @stripe/stripe-js
+npm i react-hot-toast react-icons react-router-dom react-table dotenv moment @stripe/react-stripe-js @stripe/stripe-js
 npm i --save-dev @types/react-table
 
 3)
@@ -44,3 +44,32 @@ Few changes in "package.json":
   "watch": "tsc -w",
   "dev": "nodemon ./dist/app.js"
 },
+
+
+
+  const { user, loading } = useSelector(
+    (state: RootState) => state.userReducer
+  );
+
+  const dispatch = useDispatch();
+
+  const { isAuthenticated, isLoading, getIdTokenClaims } = useAuth0();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (isAuthenticated && user) {
+        try {
+          // Optionally, you can get a JWT from Auth0 to use in your API requests
+          const token = await getIdTokenClaims();
+          const userData = await getUser(user, token?.__raw); // Fetch additional user data with token
+          dispatch(userExist(userData));
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      } else if (!isLoading) {
+        dispatch(userNotExist());
+      }
+    };
+
+    fetchUser();
+  }, [isAuthenticated, user, isLoading, getIdTokenClaims, dispatch]);

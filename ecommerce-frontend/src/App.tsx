@@ -3,7 +3,7 @@
 // ###React.suspanse(): When you use React.lazy() to split code, the component isn't immediately available. 
 // React.Suspense waits for the component to finish loading before rendering it. During this time, the fallback 
 // UI is displayed.
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
 import Header from "./components/header";
 import Loader from './components/loader';
 import ProtectedRoute from './components/protected-route';
@@ -19,11 +19,12 @@ import { Toaster } from "react-hot-toast";
 // store. Actions are used to trigger state changes in reducers.
 // 1: Trigger State Updates: Allows components to send updates to the Redux store.
 // 2: Flexible: Can dispatch actions synchronously or asynchronously (e.g., via Redux Thunks).
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from './redux/store';
-import { userExist, userNotExist } from './redux/reducer/userReducer';
-import { getUser } from './redux/api/userAPI';
-import { useAuth0 }  from '@auth0/auth0-react';
+// import { userExist, userNotExist } from './redux/reducer/userReducer';
+// import { getUser } from './redux/api/userAPI';
+// import { useAuth0 }  from '@auth0/auth0-react';
+
 
 const Home = lazy(() => import('./pages/home'))
 const Search = lazy(() => import('./pages/search'))
@@ -59,29 +60,6 @@ function App() {
   const { user, loading } = useSelector(
     (state: RootState) => state.userReducer
   );
-
-  const dispatch = useDispatch();
-
-  const { isAuthenticated, isLoading, getIdTokenClaims } = useAuth0();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (isAuthenticated && user) {
-        try {
-          // Optionally, you can get a JWT from Auth0 to use in your API requests
-          const token = await getIdTokenClaims();
-          const userData = await getUser(user, token?.__raw); // Fetch additional user data with token
-          dispatch(userExist(userData));
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      } else if (!isLoading) {
-        dispatch(userNotExist());
-      }
-    };
-
-    fetchUser();
-  }, [isAuthenticated, user, isLoading, getIdTokenClaims, dispatch]);
 
   return loading ? (
     <Loader />

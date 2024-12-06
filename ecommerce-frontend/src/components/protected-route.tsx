@@ -7,6 +7,14 @@ import { ReactElement } from "react";
 // <Outlet />: This is also a part of react-router-dom and is used to render nested routes. In this case, it's 
 // used as a fallback if no children are provided, meaning that nested routes will be rendered when the conditions 
 // pass.
+// How <Outlet /> Works:
+// 1: Route Matching:
+// **React Router uses the routing configuration to match the current URL to the route hierarchy.
+// **If the current route has nested routes, the Outlet in the parent route’s component will render the matched 
+// nested route.
+// 2: Fallback Behavior:
+// **If the children prop is provided, the ProtectedRoute component renders those children instead.
+// **If children is not provided, the Outlet ensures that nested routes (if any exist) are rendered in its place.
 import { Navigate, Outlet } from "react-router-dom";
 
 interface Props {

@@ -1,4 +1,4 @@
-import {
+  import {
     Elements,
     PaymentElement,
     useElements,
