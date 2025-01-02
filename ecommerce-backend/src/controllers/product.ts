@@ -5,7 +5,8 @@ import { Request } from "express";
 import ErrorHandler from "../utils/utility-class.js";
 // The fs module in Node.js stands for "file system". It provides an API to interact with the file system, 
 // enabling your application to read, write, delete, and manage files and directories on your system.
-// The fs module includes both: Synchronous APIs (blocking) and Asynchronous APIs (non-blocking)
+// The fs module includes both: Synchronous APIs (blocking) and Asynchronous APIs (non-blocking).
+// rm method is used to remove files or directories. rm(path, callback)
 import { rm } from "fs";
 import { myCache } from "../app.js";
 import { invalidateCache } from "../utils/features.js";
@@ -13,6 +14,7 @@ import { invalidateCache } from "../utils/features.js";
 
 export const newProduct = TryCatch(
     async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
+      
       const { name, price, stock, category } = req.body;
       const photo = req.file;
 
@@ -83,6 +85,7 @@ export const getAllCategories = TryCatch(async (req, res, next) => {
 export const getAdminProducts = TryCatch(async (req, res, next) => {
     
     let products;
+
     if (myCache.has("all-products"))
       products = JSON.parse(myCache.get("all-products") as string);
     else {
@@ -100,13 +103,12 @@ export const getSingleProduct = TryCatch(async (req, res, next) => {
     
     let product;
     const id = req.params.id;
+
     if (myCache.has(`product-${id}`))
       product = JSON.parse(myCache.get(`product-${id}`) as string);
     else {
-      product = await Product.findById(id);
-  
-      if (!product) return next(new ErrorHandler("Product Not Found", 404));
-  
+      product = await Product.findById(id);  
+      if (!product) return next(new ErrorHandler("Product Not Found", 404));  
       myCache.set(`product-${id}`, JSON.stringify(product));
     }
   
@@ -117,9 +119,11 @@ export const getSingleProduct = TryCatch(async (req, res, next) => {
 });
 
 export const updateProduct = TryCatch(async (req, res, next) => {
+
     const { id } = req.params;
     const { name, price, stock, category } = req.body;
     const photo = req.file;
+
     const product = await Product.findById(id);
   
     if (!product) return next(new ErrorHandler("Product Not Found", 404));
@@ -147,6 +151,7 @@ export const updateProduct = TryCatch(async (req, res, next) => {
 });
 
 export const deleteProduct = TryCatch(async (req, res, next) => {
+
     const product = await Product.findById(req.params.id);
 
     if (!product) return next(new ErrorHandler("Product Not Found", 404));
@@ -167,6 +172,7 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
 
 export const getAllProducts = TryCatch(
     async (req: Request<{}, {}, {}, SearchRequestQuery>, res, next) => {
+      
       const { search, sort, category, price } = req.query;
   
       const page = Number(req.query.page) || 1;
@@ -217,6 +223,26 @@ export const getAllProducts = TryCatch(
       });
     }
 );
+
+/*
+const [products, filteredOnlyProduct] = await Promise.all([
+  productsPromise,
+  Product.find(baseQuery)
+]);
+
+console.log("All Products:", products);
+console.log("Filtered Products:", filteredOnlyProduct);
+
+All Products: [
+  { _id: "1", name: "Laptop", price: 1000 },
+  { _id: "2", name: "Phone", price: 700 },
+  { _id: "3", name: "Tablet", price: 300 }
+]
+
+Filtered Products: [
+  { _id: "3", name: "Tablet", price: 300 }
+]
+*/
 
 /*
 const generateRandomProducts = async (count: number = 10) => {

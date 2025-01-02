@@ -16,5 +16,30 @@ const storage = multer.diskStorage({
 
 export const singleUpload = multer({ storage }).single("photo");
 // multer({ storage }): Configures multer to use the defined storage for handling file uploads.
-// .single("photo"): Specifies that the middleware will handle a single file upload. The field name in the form 
-// must be "photo".
+// .single("photo"): Specifies that the middleware will handle a single file upload. The field name in the form must be "photo".
+
+/*
+export const singleUpload = multer({
+    storage,
+    fileFilter: (req, file, callback) => {
+        if (!file.mimetype.startsWith("image/")) {
+            return callback(new Error("Only image files are allowed!"));
+        }
+        callback(null, true);
+    },
+    limits: { fileSize: 1 * 1024 * 1024 }, // 1MB limit
+}).single("photo");
+
+
+Example:
+{
+  "fieldname": "photo",
+  "originalname": "example.jpg",
+  "encoding": "7bit",
+  "mimetype": "image/jpeg",
+  "destination": "uploads",
+  "filename": "123e4567-e89b-12d3-a456-426614174000.jpg",
+  "path": "uploads/123e4567-e89b-12d3-a456-426614174000.jpg",
+  "size": 204800
+}
+*/

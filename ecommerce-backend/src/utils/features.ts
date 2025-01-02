@@ -59,15 +59,30 @@ export const invalidateCache = async ({
   }
 };
 
+/*
+[
+  { "_id": "1", "name": "Product A", "price": 100 },
+  { "_id": "2", "name": "Product B", "price": 200 },
+  { "_id": "3", "name": "Product C", "price": 300 }
+]
+
+const products = await Product.find({}).select("_id");
+
+[
+  { "_id": "1" },
+  { "_id": "2" },
+  { "_id": "3" }
+]
+*/
+
 export const reduceStock = async (orderItems: OrderItemType[]) => {
 
   for (let i = 0; i < orderItems.length; i++) {
 
-    const order = orderItems[i];
+    const order = orderItems[i];    
     const product = await Product.findById(order.productId);
 
     if (!product) throw new Error("Product Not Found");
-
     product.stock -= order.quantity;
 
     await product.save();
