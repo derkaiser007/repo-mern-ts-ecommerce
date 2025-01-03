@@ -61,7 +61,8 @@ schema.virtual("age").get(function () {
     let age = today.getFullYear() - dob.getFullYear();
   
     if (
-      (today.getMonth() < dob.getMonth()) ||
+      (today.getMonth() < dob.getMonth()) 
+      ||
       (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())
     ) {
       age--;

@@ -3,8 +3,8 @@ import { UserReducerInitialState } from "../../types/reducer-types";
 import { User } from "../../types/types";
 
 const initialState: UserReducerInitialState = {
-  user: null,
   loading: true,
+  user: null,
 };
 
 export const userReducer = createSlice({

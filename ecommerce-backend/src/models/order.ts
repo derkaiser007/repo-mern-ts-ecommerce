@@ -77,4 +77,16 @@ const schema = new mongoose.Schema(
   }
 );
 
+/*
+user: {
+      type: mongoose.Types.ObjectId
+      ref: "User",
+      required: true,
+      }
+
+It represents a MongoDB ObjectId field in Mongoose, which references a document in another collection.
+type: mongoose.Types.ObjectId -> It specifies that this field will store an ObjectId, the unique identifier type used by MongoDB.
+ref: "User" -> It creates a reference to the User collection. This field will store the ObjectId of a document from the User collection.
+*/
+
 export const Order = mongoose.model("Order", schema);

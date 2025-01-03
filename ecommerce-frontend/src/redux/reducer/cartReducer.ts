@@ -34,14 +34,17 @@ export const cartReducer = createSlice({
       // If the item already exists, update it; otherwise, add it to the cart
       if (index !== -1) state.cartItems[index] = action.payload;
       else state.cartItems.push(action.payload);
+
       state.loading = false;
     },
 
     removeCartItem: (state, action: PayloadAction<string>) => {
       state.loading = true;
+
       state.cartItems = state.cartItems.filter(
         (i) => i.productId !== action.payload
       );
+      
       state.loading = false;
     },
 
